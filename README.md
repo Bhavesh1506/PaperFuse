@@ -1,4 +1,4 @@
-# PDF Merger & Splitter
+# PaperFuse
 
 A privacy-first, browser-only PDF manipulation tool. **All processing happens locally - your files never leave your device.**
 
@@ -19,7 +19,7 @@ A privacy-first, browser-only PDF manipulation tool. **All processing happens lo
 
 ## 🚀 Live Demo
 
-[View Live Demo](https://your-deployment-url.netlify.app)
+[**Try PaperFuse Now →**](https://paperfuse.netlify.app/)
 
 ## 🔧 Technology Stack
 
@@ -47,7 +47,7 @@ No installation required! Simply:
 2. Open `index.html` in your browser
 
 ```bash
-git clone https://github.com/yourusername/pdf-merger.git
+git clone https://github.com/Bhavesh1506/pdf-merger.git
 cd pdf-merger
 # Open index.html in your browser
 ```
