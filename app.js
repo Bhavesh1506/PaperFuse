@@ -22,7 +22,9 @@ const state = {
     draggedId: null,        // Currently dragged page ID for reordering
     isProcessing: false,    // Flag to prevent concurrent operations
     currentFilename: 'merged', // Current filename for export
-    filenameTemplate: 'custom' // Active filename template
+    filenameTemplate: 'custom', // Active filename template
+    currentTheme: 'dark',   // Current theme (dark/light)
+    zoomPageIndex: 0        // Currently zoomed page index
 };
 
 // ===== DOM Elements =====
@@ -58,11 +60,23 @@ const elements = {
     filenameInput: document.getElementById('filenameInput'),
     filenameError: document.getElementById('filenameError'),
     cancelExport: document.getElementById('cancelExport'),
-    confirmExport: document.getElementById('confirmExport')
+    confirmExport: document.getElementById('confirmExport'),
+    
+    // Theme Toggle
+    themeToggle: document.getElementById('themeToggle'),
+    
+    // Zoom Preview Elements
+    zoomModal: document.getElementById('zoomModal'),
+    zoomClose: document.getElementById('zoomClose'),
+    zoomImage: document.getElementById('zoomImage'),
+    zoomInfo: document.getElementById('zoomInfo'),
+    zoomPrev: document.getElementById('zoomPrev'),
+    zoomNext: document.getElementById('zoomNext')
 };
 
 // ===== Initialization =====
 function init() {
+    loadSavedTheme(); // Load theme preference from localStorage
     setupEventListeners();
     updateUI();
 }
@@ -100,6 +114,27 @@ function setupEventListeners() {
     // Filename template buttons
     document.querySelectorAll('.template-btn').forEach(btn => {
         btn.addEventListener('click', () => selectFilenameTemplate(btn.dataset.template));
+    });
+    
+    // Theme toggle event
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    
+    // Zoom preview events
+    elements.zoomClose.addEventListener('click', hideZoomPreview);
+    elements.zoomPrev.addEventListener('click', () => navigateZoom(-1));
+    elements.zoomNext.addEventListener('click', () => navigateZoom(1));
+    elements.zoomModal.addEventListener('click', (e) => {
+        // Close when clicking background
+        if (e.target === elements.zoomModal) hideZoomPreview();
+    });
+    
+    // Keyboard navigation for zoom
+    document.addEventListener('keydown', (e) => {
+        if (elements.zoomModal.classList.contains('visible')) {
+            if (e.key === 'Escape') hideZoomPreview();
+            if (e.key === 'ArrowLeft') navigateZoom(-1);
+            if (e.key === 'ArrowRight') navigateZoom(1);
+        }
     });
 }
 
@@ -295,10 +330,18 @@ function createPageCard(page, displayNumber) {
         </div>
     `;
     
-    // Click to select (but not on drag handle or rotate button)
+    // Click to select (but not on drag handle, rotate button, or thumbnail)
     card.addEventListener('click', (e) => {
-        if (e.target.closest('.drag-handle') || e.target.closest('.rotate-btn')) return;
+        if (e.target.closest('.drag-handle') || e.target.closest('.rotate-btn') || e.target.closest('.page-thumbnail')) return;
         togglePageSelection(page.id);
+    });
+    
+    // Thumbnail click opens zoom preview
+    const thumbnail = card.querySelector('.page-thumbnail');
+    thumbnail.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pageIndex = state.pages.findIndex(p => p.id === page.id);
+        showZoomPreview(pageIndex);
     });
     
     // Rotate button click handler
@@ -852,6 +895,85 @@ function downloadBlob(bytes, filename) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url); // Clean up memory
+}
+
+// ===== Theme Toggle =====
+/**
+ * Load saved theme preference from localStorage
+ * Falls back to 'dark' if no preference is saved
+ */
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('paperfuse-theme') || 'dark';
+    state.currentTheme = savedTheme;
+    applyTheme(savedTheme);
+}
+
+/**
+ * Toggle between dark and light themes
+ * Saves preference to localStorage for persistence
+ */
+function toggleTheme() {
+    const newTheme = state.currentTheme === 'dark' ? 'light' : 'dark';
+    state.currentTheme = newTheme;
+    applyTheme(newTheme);
+    localStorage.setItem('paperfuse-theme', newTheme);
+    showToast(`Switched to ${newTheme} theme`, 'info');
+}
+
+/**
+ * Apply theme by setting data-theme attribute on document
+ */
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
+
+// ===== Page Zoom Preview =====
+/**
+ * Show zoom preview for a specific page
+ * Displays larger version of thumbnail with navigation
+ */
+function showZoomPreview(pageIndex) {
+    if (pageIndex < 0 || pageIndex >= state.pages.length) return;
+    
+    state.zoomPageIndex = pageIndex;
+    const page = state.pages[pageIndex];
+    
+    // Set image with rotation class
+    const rotationClass = page.rotation > 0 ? `rotate-${page.rotation}` : '';
+    elements.zoomImage.src = page.thumbnail;
+    elements.zoomImage.className = rotationClass;
+    
+    // Update info text
+    elements.zoomInfo.textContent = `Page ${pageIndex + 1} of ${state.pages.length} • ${page.sourceFile}`;
+    
+    // Update navigation button states
+    elements.zoomPrev.disabled = pageIndex === 0;
+    elements.zoomNext.disabled = pageIndex === state.pages.length - 1;
+    
+    // Show modal
+    elements.zoomModal.classList.add('visible');
+}
+
+/**
+ * Hide zoom preview modal
+ */
+function hideZoomPreview() {
+    elements.zoomModal.classList.remove('visible');
+}
+
+/**
+ * Navigate to previous/next page in zoom view
+ * @param {number} direction - -1 for previous, 1 for next
+ */
+function navigateZoom(direction) {
+    const newIndex = state.zoomPageIndex + direction;
+    if (newIndex >= 0 && newIndex < state.pages.length) {
+        showZoomPreview(newIndex);
+    }
 }
 
 // ===== Start Application =====
