@@ -11,6 +11,12 @@ Live Demo - https://paperfuse.netlify.app/
 
 PaperFuse is a client-side PDF tool for merging, arranging, and exporting documents without uploading files to any server.
 
+##  Screenshots
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/aada8d07-54e6-4308-91e6-fc2e307b2586" />
+
+
+
 ##  Features
 
 ### Multi-PDF Merge
@@ -51,14 +57,6 @@ cd PaperFuse
 npm install
 npm run dev
 ```
-
-## Screenshots
-
-[Add screenshots here]
-
-## Contributing
-
-Contributions are welcome. Feel free to open an issue for ideas, bug reports, or feature requests, and submit a PR if you want to improve PaperFuse.
 
 ## License
 
