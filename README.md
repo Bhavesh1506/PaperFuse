@@ -15,6 +15,11 @@ PaperFuse is a client-side PDF tool for merging, arranging, and exporting docume
 
 <img width="1920" height="1080" alt="Screenshot (665)" src="https://github.com/user-attachments/assets/7d4589e8-e5d9-4dc3-9b55-af6cf4c6027d" />
 
+<img width="1920" height="1080" alt="Screenshot (666)" src="https://github.com/user-attachments/assets/9011fb4e-cc69-485a-a631-0ed9beeefcf7" />
+
+<img width="1920" height="1080" alt="Screenshot (667)" src="https://github.com/user-attachments/assets/0409fc68-eb5f-4f6e-9f1b-626e849876b4" />
+
+
 ##  Features
 
 ### Multi-PDF Merge
